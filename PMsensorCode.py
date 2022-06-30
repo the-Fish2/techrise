@@ -9,10 +9,19 @@ pmsensor = SPS30_I2C(i2c, 0x69)
 aqsensor = adafruit_bme680.Adafruit_BME680_I2C(i2c, 0x77)
 
 while curr_events == RISING:
+    #pmsensor
     results = pmsensor.read()
     print(results)
     print("PM2.5: {:d}".format(results["pm25 standard"]))
+   
+    #aqi sensor
+    print('Temperature: {} degrees C'.format(sensor.temperature))
+    print('Gas: {} ohms'.format(sensor.gas))
+    print('Humidity: {}%'.format(sensor.humidity))
+    print('Pressure: {}hPa'.format(sensor.pressure))
+    
     time.sleep(20)
-#aqdata should have values: 'particles 40um', 'particles 10um', 'pm10 standard', 'pm100 standard', 'pm25 standard', 'particles 25um', 'particles 100um', 'particles 05um', 'tps', 'pm40 standard'
+    
+#results should have values: 'particles 40um', 'particles 10um', 'pm10 standard', 'pm100 standard', 'pm25 standard', 'particles 25um', 'particles 100um', 'particles 05um', 'tps', 'pm40 standard'
 # other sensors running
 #remember - indentation necessary in python (ew)
