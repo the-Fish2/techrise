@@ -6,7 +6,7 @@ import adafruit_bme688
 
 i2c = board.I2C()
 pmsensor = SPS30_I2C(i2c, 0x69)
-aqsensor = adafruit_bme688.Adafruit_BME680_I2C(i2c, 0x77)
+aqsensor = adafruit_bme688.Adafruit_BME680_I2C(i2c, 0x77) #if this doesn't work try 0x76
 
 aqsensor.sea_level_pressure = 1013
 temperature_offset = -5 
