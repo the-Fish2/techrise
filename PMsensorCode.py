@@ -2,13 +2,14 @@ import time
 import board
 #the above should have already been imported. 
 from adafruit_sps30.i2c import SPS30_I2C
+import adafruit_bme688
 
-# printing should work first
 i2c = board.I2C()
-sps = SPS30_I2C(i2c, 0x69)
+pmsensor = SPS30_I2C(i2c, 0x69)
+aqsensor = adafruit_bme680.Adafruit_BME680_I2C(i2c, 0x77)
 
 while curr_events == RISING:
-    results = sps.read()
+    results = pmsensor.read()
     print(results)
     print("PM2.5: {:d}".format(results["pm25 standard"]))
     time.sleep(20)
