@@ -22,22 +22,42 @@ temperature_offset = -5
 #needs to be calibrated
 
 while curr_events == RISING:
-    #pmsensor
-    results = pmsensor.read()
-    print(results)
-    print("PM2.5: {:d}".format(results["pm25 standard"]))
+    
+    pmsensor.wakeup();
+    pmsensor.start();
+    start = time.monotonic();  
     
     with open("/sd/readings.txt", "a") as f:
+        #balloon
         f.write('ALTITUDE', '%.3f' % TRsim.altitude)
+        
+        #aqi
         temp = aqsensor.temperature();
         f.write('Temperature: {} degrees C'.format(temp))
         f.write('Gas: {} ohms'.format(aqsensor.gas))
         f.write('Humidity: {}%'.format(aqsensor.humidity))
         f.write('Pressure: {}hPa'.format(aqsensor.pressure))
+        
+        #cleaning the fan of the pm sensor - code found on https://github.com/kevinjwalters/Adafruit_CircuitPython_SPS30/blob/master/examples/sps30_test.py
+        sps30_fp.clean(wait=4)
+        for i in range(2 * (10 - 4 + 15)):
+            cleaning = bool(sps30_fp.read_status_register() & sps30_fp.STATUS_FAN_CLEANING)
+            print("c" if cleaning else ".", end="")
+            if not cleaning:
+                break
+            time.sleep(0.5)
+        
+        #pm sensor
         if (temp > -10 and temp < 60):
+            now = time.monotonic();
+            time.sleep(30 - (now - start));
+            
+            
             results = pmsensor.read()
             f.write(results);
         
+    pmsensor.stop();
+    pmsensor.sleep();
     
     time.sleep(20)
     
