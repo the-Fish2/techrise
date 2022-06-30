@@ -1,8 +1,17 @@
 import time
 import board
-#the above should have already been imported. 
+import busio
+import sdcardio
+import storage
 from adafruit_sps30.i2c import SPS30_I2C
 import adafruit_bme688
+
+#do not rearrange code; SD card must come first
+spi = board.SPI()
+# if this doesn't work; spi = busio.SPI(board.SD_SCK, MOSI=board.SD_MOSI, MISO=board.SD_MISO)
+sdcard = sdcardio.SDCard(spi, cs)
+vfs = storage.VfsFat(sdcard)
+storage.mount(vfs, "/sd")
 
 i2c = board.I2C()
 pmsensor = SPS30_I2C(i2c, 0x69)
@@ -17,12 +26,16 @@ while curr_events == RISING:
     results = pmsensor.read()
     print(results)
     print("PM2.5: {:d}".format(results["pm25 standard"]))
-   
-    #aqi sensor
-    print('Temperature: {} degrees C'.format(sensor.temperature))
-    print('Gas: {} ohms'.format(sensor.gas))
-    print('Humidity: {}%'.format(sensor.humidity))
-    print('Pressure: {}hPa'.format(sensor.pressure))
+    
+    with open("/sd/readings.txt", "a") as f:
+        f.write('ALTITUDE', '%.3f' % TRsim.altitude)
+        temp = aqsensor.temperature();
+        f.write('Temperature: {} degrees C'.format(temp))
+        f.write('Gas: {} ohms'.format(aqsensor.gas))
+        f.write('Humidity: {}%'.format(aqsensor.humidity))
+        f.write('Pressure: {}hPa'.format(aqsensor.pressure))
+        
+    if (temp < 
     
     time.sleep(20)
     
