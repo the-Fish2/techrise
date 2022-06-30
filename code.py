@@ -8,6 +8,10 @@ i2c = board.I2C()
 pmsensor = SPS30_I2C(i2c, 0x69)
 aqsensor = adafruit_bme680.Adafruit_BME680_I2C(i2c, 0x77)
 
+aqsensor.sea_level_pressure = 1013
+temperature_offset = -5 
+#needs to be calibrated
+
 while curr_events == RISING:
     #pmsensor
     results = pmsensor.read()
