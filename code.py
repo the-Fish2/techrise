@@ -34,8 +34,10 @@ while curr_events == RISING:
         f.write('Gas: {} ohms'.format(aqsensor.gas))
         f.write('Humidity: {}%'.format(aqsensor.humidity))
         f.write('Pressure: {}hPa'.format(aqsensor.pressure))
+        if (temp > -10 and temp < 60):
+            results = pmsensor.read()
+            f.write(results);
         
-    if (temp < 
     
     time.sleep(20)
     
