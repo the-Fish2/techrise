@@ -5,7 +5,7 @@ from adafruit_sps30.i2c import SPS30_I2C
 
 # printing should work first
 i2c = board.I2C()
-sps = SPS30_I2C(i2c)
+sps = SPS30_I2C(i2c, 0x69)
 
 while curr_events == RISING:
     results = sps.read()
