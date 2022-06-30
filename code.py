@@ -48,10 +48,15 @@ while curr_events == RISING:
             time.sleep(0.5)
         
         #pm sensor
+        #declare an array of values and then avg all of them basically
+        arr = [0, 0, 0, 0, 0, 0, 0, 0]
         if (temp > -10 and temp < 60):
             now = time.monotonic();
             time.sleep(30 - (now - start));
             
+            for i in range 15: 
+                arr[0] = 
+                time.sleep(1)
             
             results = pmsensor.read()
             f.write(results);
