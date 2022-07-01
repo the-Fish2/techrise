@@ -34,10 +34,11 @@ while curr_events == RISING:
     pmsensor.wakeup();
     pmsensor.start();
     start = time.monotonic();  
+    currAlt = TRsim.altitude;
     
+    #opens to edit file
     with open("/sd/readings.txt", "a") as f:
         #balloon
-        currAlt = TRsim.altitude;
         f.write('ALTITUDE', '%.3f' % currAlt)
         
         #aqi
@@ -77,8 +78,10 @@ while curr_events == RISING:
     pmsensor.stop();
     pmsensor.sleep();
     
+    #potential issue: maybe overriding previous image on sd card? so fixed
+    s = "/sd/image" + str(currAlt) + ".jpg";    
     if (frame_length > 0 and currAlt - initAlt >= 3500): 
-        with open("/sd/image.jpg", "wb") as f:
+        with open(s, "wb") as f:
             # Compute how much data is left to read as the lesser of remaining bytes
             # or the copy buffer size (32 bytes at a time).  Buffer size MUST be
             # a multiple of 4 and under 100.  Stick with 32!
@@ -87,8 +90,9 @@ while curr_events == RISING:
             vc0706.read_picture_into(copy_buffer)
             f.write(copy_buffer)
             frame_length -= 32
-            initAlt = currAlt
-    
+            
+            
+    initAlt = currAlt
     time.sleep(20)
     
 #results should have values: 'particles 40um', 'particles 10um', 'pm10 standard', 'pm100 standard', 'pm25 standard', 'particles 25um', 'particles 100um', 'particles 05um', 'tps', 'pm40 standard'
