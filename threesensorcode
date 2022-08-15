@@ -19,6 +19,7 @@ uart = busio.UART(board.TX, board.RX, baudrate=38400)
 vc0706 = adafruit_vc0706.VC0706(uart)
 vc0706.image_size = adafruit_vc0706.IMAGE_SIZE_320x240
 
+print("taking pic!")
 vc0706.take_picture()
 frame_length = vc0706.frame_length
 print(frame_length)
@@ -40,10 +41,14 @@ with open(s, "wb") as f:
         if (wcount >= 64):
             print(".", end=" ")
             wcount = 0
+
+    f.close()
+
+with open("/sd/temps.txt", "a") as f:
+    f.write(str(altitude))
+    f.write('Temperature: {} degrees C'.format(aqsensor.temperature))
+    f.write('Gas: {} ohms'.format(aqsensor.gas))
+    f.write('Humidity: {}%'.format(aqsensor.humidity))
+    f.write('Pressure: {}hPa'.format(aqsensor.pressure))
     
     f.close()
-    
-with open("/sd/temps.txt", "w") as f:
-    print(altitude)
-    print(aqsensor.temperature);
-
