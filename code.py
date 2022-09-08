@@ -65,6 +65,14 @@ while True:
             if curr_events != prev_events:
                 prev_events = curr_events
 
+            if (aqsensor.temperature < -30):
+                asleep = True
+                pmsensor.stop();
+                pmsensor.sleep();
+            else:
+                pmsensor.wakeup();
+                pmsensor.start();
+                asleep = False
 
             if (num_packets % 500 == 1):
                 altitude = TRsim.altitude
@@ -92,15 +100,6 @@ while True:
 #                                 wcount = 0
 
 #                         f.close()
-                    if (aqsensor.temperature < -30):
-                        asleep = True
-                        pmsensor.stop();
-                        pmsensor.sleep();
-                    else:
-                        pmsensor.wakeup();
-                        pmsensor.start();
-                        asleep = False
-
                     with open("/sd/temps.txt", "a") as f:
                         f.write(str(altitude) + ", ")
                         print(altitude)
