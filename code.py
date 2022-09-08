@@ -1,101 +1,118 @@
-import time
+import trsim_raven
 import board
 import busio
 import sdcardio
 import storage
-from adafruit_sps30.i2c import SPS30_I2C
-import adafruit_bme688
+import time
 import adafruit_vc0706
+import adafruit_bme680
+from adafruit_sps30.i2c import SPS30_I2C
 
-#do not rearrange code; SD card must come first
+i2c = board.I2C()
+pmsensor = SPS30_I2C(i2c, 0x69)
+aqsensor = adafruit_bme680.Adafruit_BME680_I2C(i2c, 0x77)
+
 spi = board.SPI()
-# if this doesn't work; spi = busio.SPI(board.SD_SCK, MOSI=board.SD_MOSI, MISO=board.SD_MISO)
+cs = board.D7
 sdcard = sdcardio.SDCard(spi, cs)
 vfs = storage.VfsFat(sdcard)
 storage.mount(vfs, "/sd")
 
-i2c = board.I2C()
-pmsensor = SPS30_I2C(i2c, 0x69)
+with open("/sd/temps.txt", "w") as f:
+    f.write("Altitude, Temperature (C), Gas (ohms), Humidity (%), Pressure (hPa), 40um particles, 10um particles, pm10 standard, pm100 standard, pm25 standard, 25um particles, 100um particles, particles 05um, tps, pm40 standard")
+    f.write("\n")
+    f.close()
 
-aqsensor = adafruit_bme688.Adafruit_BME680_I2C(i2c, 0x77) #if this doesn't work try 0x76
-aqsensor.sea_level_pressure = 1013
-temperature_offset = -5 
-#needs to be calibrated
+# uart = busio.UART(board.TX, board.RX, baudrate=38400)
+# vc0706 = adafruit_vc0706.VC0706(uart)
+# vc0706.image_size = adafruit_vc0706.IMAGE_SIZE_320x240
 
-uart = busio.UART(board.TX, board.RX) #i think just d0 d1 will check later
-vc0706 = adafruit_vc0706.VC0706(uart)
-vc0706.baudrate = 115200
-vc0706.image_size = adafruit_vc0706.IMAGE_SIZE_320x240
-frame_length = vc0706.frame_length
-initAlt = 0;
+TRsim = trsim_raven.Simulator(pbf_pin=board.D2, go_pin=board.D3)
 
-while curr_events == RISING:
-    
-    pmsensor.wakeup();
-    pmsensor.start();
-    start = time.monotonic();  
-    currAlt = TRsim.altitude;
-    
-    #opens to edit file
-    with open("/sd/readings.txt", "a") as f:
-        #balloon
-        f.write('ALTITUDE', '%.3f' % currAlt)
-        
-        #aqi
-        temp = aqsensor.temperature();
-        f.write('Temperature: {} degrees C'.format(temp))
-        f.write('Gas: {} ohms'.format(aqsensor.gas))
-        f.write('Humidity: {}%'.format(aqsensor.humidity))
-        f.write('Pressure: {}hPa'.format(aqsensor.pressure))
-        
-        #ought to test whether cleaning the fan impacts the reading or if not, do so at home
-        #cleaning the fan of the pm sensor - code found on https://github.com/kevinjwalters/Adafruit_CircuitPython_SPS30/blob/master/examples/sps30_test.py
-        sps30_fp.clean(wait=4)
-        for i in range(2 * (10 - 4 + 15)):
-            cleaning = bool(sps30_fp.read_status_register() & sps30_fp.STATUS_FAN_CLEANING)
-            print("c" if cleaning else ".", end="")
-            if not cleaning:
-                break
-            time.sleep(0.5)
-        
-        #pm sensor
-        #declare an array of values and then avg all of them basically
-        if (temp > -10 and temp < 60):
-            now = time.monotonic()
-            time.sleep(30 - (now - start))
-            
-            results = pmsensor.read()
-            for i in range 15: 
-                results2 = pmsensor.read()
-                for i in range results.len:
-                    results[i] += results2[i]
-                time.sleep(1)
-            
-            for x in results:
-                x = x/15;
-                f.write(x + " ");
-        
-    pmsensor.stop();
-    pmsensor.sleep();
-    
-    #potential issue: maybe overriding previous image on sd card? so fixed
-    s = "/sd/image" + str(currAlt) + ".jpg";    
-    if (frame_length > 0 and currAlt - initAlt >= 3500): 
-        with open(s, "wb") as f:
-            # Compute how much data is left to read as the lesser of remaining bytes
-            # or the copy buffer size (32 bytes at a time).  Buffer size MUST be
-            # a multiple of 4 and under 100.  Stick with 32!
-            to_read = min(frame_length, 32)
-            copy_buffer = bytearray(to_read)
-            vc0706.read_picture_into(copy_buffer)
-            f.write(copy_buffer)
-            frame_length -= 32
-            
-            
-    initAlt = currAlt
-    time.sleep(20)
-    
-#results should have values: 'particles 40um', 'particles 10um', 'pm10 standard', 'pm100 standard', 'pm25 standard', 'particles 25um', 'particles 100um', 'particles 05um', 'tps', 'pm40 standard'
-#note that pm100 standard and pm40 standard ARE GUESSES BASED ON SURROUNDINGS, only exact data is 25 and 10
-# other sensors running
-#remember - indentation necessary in python (ew)
+LAND = 0
+RISING = 1
+FLOATING = 2
+DESCENDING = 3
+curr_events = LAND
+prev_events = curr_events
+
+num_packets = 0
+
+RISE_TH = -2
+FLOAT_TH = 4
+DSCND_TH = 5
+
+while True:
+    TRsim.update()
+    if (TRsim.streaming):
+        if TRsim.new_data:
+            num_packets += 1
+            data=TRsim.data
+
+            curr_vd = TRsim.velocity_down
+
+            if curr_vd < RISE_TH:
+                curr_events = RISING
+            elif curr_vd >= RISE_TH and curr_vd < DSCND_TH and curr_events != LAND:
+                curr_events = FLOATING
+            elif curr_vd >= DSCND_TH:
+                curr_events = DESCENDING
+            else:
+                curr_events = LAND
+
+            if curr_events != prev_events:
+                prev_events = curr_events
+
+
+            if (num_packets % 500 == 1):
+                altitude = TRsim.altitude
+                if curr_events == RISING:
+#                     print("taking pic!")
+#                     vc0706.take_picture()
+#                     frame_length = vc0706.frame_length
+#                     print(frame_length)
+
+
+#                     s = "/sd/image" + str(altitude) + ".jpg"
+
+#                     with open(s, "wb") as f:
+#                         wcount = 0
+#                         while frame_length > 0:
+#                             to_read = min(frame_length, 32)
+#                             copy_buffer = bytearray(to_read)
+#                             if (vc0706.read_picture_into(copy_buffer) == 0):
+#                                 raise RuntimeError("oof l+ratio")
+#                             f.write(copy_buffer)
+#                             frame_length -= 32
+#                             wcount += 1
+#                             if (wcount >= 64):
+#                                 print(".", end=" ")
+#                                 wcount = 0
+
+#                         f.close()
+
+                    with open("/sd/temps.txt", "a") as f:
+                        f.write(str(altitude) + ", ")
+                        results = pmsensor.read()
+                        print(altitude)
+                        f.write("{}, {}, {}, {}, ".format(aqsensor.temperature, aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
+                        results = pmsensor.read()
+                        for key in results:
+                            f.write(str(results[key]) + ", ")
+                        f.write("\n")
+                        f.close()
+# altitude = 0
+# with open("/sd/temps.txt", "a") as f:
+#     f.write(str(altitude))
+#     results = pmsensor.read()
+#     f.write('Temperature: {} degrees C'.format(aqsensor.temperature))
+#     f.write('Gas: {} ohms'.format(aqsensor.gas))
+#     f.write('Humidity: {}%'.format(aqsensor.humidity))
+#     f.write('Pressure: {}hPa'.format(aqsensor.pressure))
+#     f.write('\n')
+#     results = pmsensor.read()
+#     for key in results:
+#         f.write(str(key) + " " + str(results[key]) + "\n")
+
+#     f.close()
+
