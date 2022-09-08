@@ -43,7 +43,7 @@ FLOAT_TH = 4
 DSCND_TH = 5
 
 asleep = False
-temp2 = 0
+
 while True:
     TRsim.update()
     if (TRsim.streaming):
@@ -92,8 +92,7 @@ while True:
 #                                 wcount = 0
 
 #                         f.close()
-                    #temp2 = aqsensor.temperature
-                    if (temp2 < -30):
+                    if (aqsensor.temperature < -30):
                         asleep = True
                         pmsensor.stop();
                         pmsensor.sleep();
@@ -113,7 +112,6 @@ while True:
                         f.write("\n")
                         f.close()
                         
-                    temp2 = -40
 # altitude = 0
 # with open("/sd/temps.txt", "a") as f:
 #     f.write(str(altitude))
