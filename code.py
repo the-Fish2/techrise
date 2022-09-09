@@ -12,11 +12,7 @@ i2c = board.I2C()
 pmsensor = SPS30_I2C(i2c, 0x69)
 aqsensor = adafruit_bme680.Adafruit_BME680_I2C(i2c, 0x77)
 
-# i = 0;
-# while (i < 60):
-#     print(aqsensor.gas, end = ", ")
-#     time.sleep(10)
-#     i+= 1
+#bme increments by 4 degrees, thus vals subtracted
 
 spi = board.SPI()
 cs = board.D7
@@ -73,7 +69,7 @@ while True:
             if curr_events != prev_events:
                 prev_events = curr_events
 
-            if (not asleep and (aqsensor.temperature < -30 or aqsensor.temperature > 50)):
+            if (not asleep and (aqsensor.temperature < -26 or aqsensor.temperature > 54)):
                 asleep = True
                 pmsensor.stop();
                 pmsensor.sleep();
@@ -82,7 +78,7 @@ while True:
                 pmsensor.start();
                 asleep = False
                 
-            if (not prevtimeuse and aqsensor.temperature > 40):
+            if (not prevtimeuse and aqsensor.temperature > 44):
                 asleep = True
                 prevtimeuse = True
                 pmsensor.stop()
@@ -98,6 +94,8 @@ while True:
 
             if (num_packets % 500 == 1):
                 altitude = TRsim.altitude
+                print(altitude)
+                print("1")
                 if curr_events == RISING:
 #                     print("taking pic!")
 #                     vc0706.take_picture()
@@ -124,26 +122,11 @@ while True:
 #                         f.close()
                     with open("/sd/temps.txt", "a") as f:
                         print(altitude)
-                        f.write("{}, {}, {}, {}, {}, {}, ".format(altitude, TRsim.time_secs, aqsensor.temperature, aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
+                        f.write("{}, {}, {}, {}, {}, {}, ".format(altitude, TRsim.time_secs, aqsensor.temperature-4, aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
                         if (not asleep):
                             results = pmsensor.read()
                             for key in results:
                                 f.write(str(results[key]) + ", ")
                         f.write("\n")
                         f.close()
-                        
-# altitude = 0
-# with open("/sd/temps.txt", "a") as f:
-#     f.write(str(altitude))
-#     results = pmsensor.read()
-#     f.write('Temperature: {} degrees C'.format(aqsensor.temperature))
-#     f.write('Gas: {} ohms'.format(aqsensor.gas))
-#     f.write('Humidity: {}%'.format(aqsensor.humidity))
-#     f.write('Pressure: {}hPa'.format(aqsensor.pressure))
-#     f.write('\n')
-#     results = pmsensor.read()
-#     for key in results:
-#         f.write(str(key) + " " + str(results[key]) + "\n")
-
-#     f.close()
 
