@@ -31,6 +31,8 @@ with open("/sd/temps.txt", "w") as f:
 
 TRsim = trsim_raven.Simulator(pbf_pin=board.D2, go_pin=board.D3)
 
+print(TRsim.time_secs)
+
 LAND = 0
 RISING = 1
 FLOATING = 2
@@ -77,25 +79,23 @@ while True:
                 pmsensor.wakeup();
                 pmsensor.start();
                 asleep = False
-                
-            if (not prevtimeuse and aqsensor.temperature > 44):
+
+            if ((not prevtimeuse) and aqsensor.temperature > 44):
                 asleep = True
                 prevtimeuse = True
                 pmsensor.stop()
                 pmsensor.sleep()
                 prevtime = TRsim.time_secs
-                
-            if (prevtimeuse and TRsim.time_secs > prevtime + 300):
+
+            if (prevtimeuse and TRsim.time_secs > prevtime + 300 and aqsensor.temperature < 44):
                 prevtimeuse = False
                 alseep = False
                 pmsensor.wakeup();
                 pmsensor.start();
-                
 
-            if (num_packets % 500 == 1):
+
+            if (num_packets % 5 == 1):
                 altitude = TRsim.altitude
-                print(altitude)
-                print("1")
                 if curr_events == RISING:
 #                     print("taking pic!")
 #                     vc0706.take_picture()
@@ -122,7 +122,7 @@ while True:
 #                         f.close()
                     with open("/sd/temps.txt", "a") as f:
                         print(altitude)
-                        f.write("{}, {}, {}, {}, {}, {}, ".format(altitude, TRsim.time_secs, aqsensor.temperature-4, aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
+                        f.write("{}, {}, {}, {}, {}, {}, ".format(altitude, TRsim.time_secs, (aqsensor.temperature-4), aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
                         if (not asleep):
                             results = pmsensor.read()
                             for key in results:
