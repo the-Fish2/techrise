@@ -12,6 +12,12 @@ i2c = board.I2C()
 pmsensor = SPS30_I2C(i2c, 0x69)
 aqsensor = adafruit_bme680.Adafruit_BME680_I2C(i2c, 0x77)
 
+# i = 0;
+# while (i < 60):
+#     print(aqsensor.gas, end = ", ")
+#     time.sleep(10)
+#     i+= 1
+
 spi = board.SPI()
 cs = board.D7
 sdcard = sdcardio.SDCard(spi, cs)
@@ -19,7 +25,7 @@ vfs = storage.VfsFat(sdcard)
 storage.mount(vfs, "/sd")
 
 with open("/sd/temps.txt", "w") as f:
-    f.write("Altitude, Temperature (C), Gas (ohms), Humidity (%), Pressure (hPa), 40um particles, 10um particles, pm10 standard, pm100 standard, pm25 standard, 25um particles, 100um particles, particles 05um, tps, pm40 standard")
+    f.write("Time, Altitude, Temperature (C), Gas (ohms), Humidity (%), Pressure (hPa), 40um particles, 10um particles, pm10 standard, pm100 standard, pm25 standard, 25um particles, 100um particles, particles 05um, tps, pm40 standard")
     f.write("\n")
     f.close()
 
@@ -43,6 +49,8 @@ FLOAT_TH = 4
 DSCND_TH = 5
 
 asleep = False
+prevtime = 0
+prevtimeuse = False
 
 while True:
     TRsim.update()
@@ -65,7 +73,7 @@ while True:
             if curr_events != prev_events:
                 prev_events = curr_events
 
-            if (aqsensor.temperature < -30):
+            if (not asleep and (aqsensor.temperature < -30 or aqsensor.temperature > 50)):
                 asleep = True
                 pmsensor.stop();
                 pmsensor.sleep();
@@ -73,6 +81,20 @@ while True:
                 pmsensor.wakeup();
                 pmsensor.start();
                 asleep = False
+                
+            if (not prevtimeuse and aqsensor.temperature > 40):
+                asleep = True
+                prevtimeuse = True
+                pmsensor.stop()
+                pmsensor.sleep()
+                prevtime = TRsim.time_secs
+                
+            if (prevtimeuse and TRsim.time_secs > prevtime + 300):
+                prevtimeuse = False
+                alseep = False
+                pmsensor.wakeup();
+                pmsensor.start();
+                
 
             if (num_packets % 500 == 1):
                 altitude = TRsim.altitude
@@ -101,9 +123,8 @@ while True:
 
 #                         f.close()
                     with open("/sd/temps.txt", "a") as f:
-                        f.write(str(altitude) + ", ")
                         print(altitude)
-                        f.write("{}, {}, {}, {}, ".format(aqsensor.temperature, aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
+                        f.write("{}, {}, {}, {}, {}, {}, ".format(altitude, TRsim.time_secs, aqsensor.temperature, aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
                         if (not asleep):
                             results = pmsensor.read()
                             for key in results:
