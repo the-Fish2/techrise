@@ -97,9 +97,12 @@ while True:
                         print(altitude)
                         f.write("{}, {}, {}, {}, {}, {}, ".format(altitude, TRsim.time_secs, (aqsensor.temperature-4), aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
                         if (not asleep):
-                            results = pmsensor.read()
-                            for key in results:
-                                f.write(str(results[key]) + ", ")
+                            try:
+                                results = pmsensor.read()
+                                for key in results:
+                                    f.write(str(results[key]) + ", ")
+                            except:
+                               asleep = true
                         f.write("\n")
                         f.close()
 
