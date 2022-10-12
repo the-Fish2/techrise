@@ -29,6 +29,7 @@ with open("/sd/temps.txt", "a") as f:
 TRsim = trsim_raven.Simulator(pbf_pin=board.D2, go_pin=board.D3)
 
 print(TRsim.time_secs)
+currTemp = aqsensor.temperature - 4
 
 LAND = 0
 RISING = 1
@@ -71,43 +72,23 @@ while True:
             if (num_packets % 10 == 1):
                 altitude = TRsim.altitude
                 if curr_events == RISING:
-#                     print("taking pic!")
-#                     vc0706.take_picture()
-#                     frame_length = vc0706.frame_length
-#                     print(frame_length)
-
-
-#                     s = "/sd/image" + str(altitude) + ".jpg"
-
-#                     with open(s, "wb") as f:
-#                         wcount = 0
-#                         while frame_length > 0:
-#                             to_read = min(frame_length, 32)
-#                             copy_buffer = bytearray(to_read)
-#                             if (vc0706.read_picture_into(copy_buffer) == 0):
-#                                 raise RuntimeError("oof l+ratio")
-#                             f.write(copy_buffer)
-#                             frame_length -= 32
-#                             wcount += 1
-#                             if (wcount >= 64):
-#                                 print(".", end=" ")
-#                                 wcount = 0
-
-#                         f.close()
                     with open("/sd/temps.txt", "a") as f:
                         print(altitude)
                         f.write("{}, {}, ".format(altitude, TRsim.time_secs))
                         if (not asleepAQ):
                             try:
                                 f.write("{}, {}, {}, {}, ".format((aqsensor.temperature-4), aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
+                                currTemp = aqsensor.temperature - 4
                             except:
+                                f.write("AQsensorerror")
                                 asleepAQ = True
-                        if (not asleepPM):
+                        if (not asleepPM and currTemp > -15):
                             try:
                                 results = pmsensor.read()
                                 for key in results:
                                     f.write(str(results[key]) + ", ")
                             except:
+                                f.write("PMsensorerror")
                                 asleepPM = True
                         f.write("\n")
                         f.close()
