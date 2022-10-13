@@ -45,7 +45,7 @@ FLOAT_TH = 4
 DSCND_TH = 5
 
 asleepPM = False
-alseepAQ = False
+asleepAQ = False
 
 while True:
     TRsim.update()
@@ -82,7 +82,8 @@ while True:
                             except:
                                 f.write("AQsensorerror")
                                 asleepAQ = True
-                        if (not asleepPM and currTemp > -15):
+
+                        if (not asleepPM and currTemp > -18):
                             try:
                                 results = pmsensor.read()
                                 for key in results:
@@ -92,4 +93,3 @@ while True:
                                 asleepPM = True
                         f.write("\n")
                         f.close()
-
