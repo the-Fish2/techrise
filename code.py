@@ -84,6 +84,5 @@ while True:
                                     f.write(str(results[key]) + ", ")
                             except:
                                 f.write("PMsensorerror")
-                                asleepPM = True
                         f.write("\n")
                         f.close()
