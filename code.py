@@ -44,9 +44,6 @@ RISE_TH = -2
 FLOAT_TH = 4
 DSCND_TH = 5
 
-asleepPM = False
-asleepAQ = False
-
 while True:
     TRsim.update()
     if (TRsim.streaming):
@@ -75,15 +72,12 @@ while True:
                     with open("/sd/temps.txt", "a") as f:
                         print(altitude)
                         f.write("{}, {}, ".format(altitude, TRsim.time_secs))
-                        if (not asleepAQ):
-                            try:
-                                f.write("{}, {}, {}, {}, ".format((aqsensor.temperature-4), aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
-                                currTemp = aqsensor.temperature - 4
-                            except:
-                                f.write("AQsensorerror")
-                                asleepAQ = True
-
-                        if (not asleepPM and currTemp > -18):
+                        try:
+                            f.write("{}, {}, {}, {}, ".format((aqsensor.temperature-4), aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
+                            currTemp = aqsensor.temperature - 4
+                        except:
+                            f.write("AQsensorerror")
+                        if (currTemp > -18):
                             try:
                                 results = pmsensor.read()
                                 for key in results:
