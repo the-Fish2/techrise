@@ -1,18 +1,18 @@
 # NASA Techrise Challenge Work
 
-##Before Flight##
+## Before Flight ##
 
-###Hypothesis###
+### Hypothesis ###
 Pollution is concentrated at lower altitudes, due to denser particles sinking. However, there is the possibility of environmental factors, such as thermal inversion, causing a different result. 
 
-###Data###
+### Data ###
 * Determining the percentage of air pollution
 * Detailed quantification of air pollution resulting in improved targeting/ scoping of possible solutions
 * Determination of the percentage of air pollution that is below cloud level contributing to getting recycled into the hydrologic cycle and thereby to water pollution. 
 * Correlation between living at higher altitudes and prevalence of lung cancer and other similar health implications.
 * Qualitative implication of air pollution. This can be used to raise awareness and rally efforts to address air pollution, similar to: endangered species photo archive, glacial melt photographs, library of lost sounds of animals.
 
-###Fun Issues###
+### Fun Issues ###
 * Working with computers
   * Video decoder issues
   * Memory issues - my computer can render videos stored on the hard disk drive, but not as reliably from an SD card
