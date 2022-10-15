@@ -44,3 +44,27 @@ The code itself works with a Dashcam (hacked), a SPS 30 particulate matter senso
 Leave the .fseventsd and Trashes files on your Metro M4 Express, these are in addition. 
 Lib files from Adafruit's documentation. 
 The Dashcam does not have code, for formatting it to allow a 7 hr flight, format a 64GB card to Fat32 and it should work. 
+
+### Specs ###
+Weighs 527.3 g / 1.16 lb
+Size: 40 x 40 x 80 inch / 101.6 x 101.6 x 203.2 cm box
+5 V
+0.27 A
+
+Data Parameters collected:
+* Vehicle_Time
+* Vehicle_Altitude
+* Temperature (C)
+* Gas (ohms)
+* Humidity (%)
+* Pressure (hPa)
+* 40um particles
+* 10um particles
+* pm10 standard
+* pm100 standard
+* pm25 standard
+* 25um particles
+* 100um particles
+* particles 05um
+* pm40 standard
+* Image (color of sky)
