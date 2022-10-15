@@ -1,4 +1,5 @@
 # NASA Techrise Challenge Work
+Nishka Kacheria
 
 ## Before Flight ##
 
@@ -37,5 +38,9 @@ Pollution is concentrated at lower altitudes, due to denser particles sinking. H
   * Popsicle sticks absorb humidity and skew readings
 
 ### Code ###
-Clone the repository and save it to the metro. Certain files, ie TRSim Raven, require certain other physical parts (sent from NASA) to work.
-The code itself works with a Dashcam (hacked), a SPS 30 particulate matter sensor, and a BME 688 AQI. There is also an attached SD card.
+Clone the repository and save it to the metro, in addition to missing files. 
+Certain files, ie TRSim Raven, require certain other physical parts (sent from NASA) to work.
+The code itself works with a Dashcam (hacked), a SPS 30 particulate matter sensor, an SD Card breakout board, and a BME 680/688 AQI. 
+Leave the .fseventsd and Trashes files on your Metro M4 Express, these are in addition. 
+Lib files from Adafruit's documentation. 
+The Dashcam does not have code, for formatting it to allow a 7 hr flight, format a 64GB card to Fat32 and it should work. 
