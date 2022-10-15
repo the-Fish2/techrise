@@ -76,13 +76,13 @@ while True:
                             f.write("{}, {}, {}, {}, ".format((aqsensor.temperature-4), aqsensor.gas, aqsensor.humidity, aqsensor.pressure))
                             currTemp = aqsensor.temperature - 4
                         except:
-                            f.write("AQsensorerror")
+                            f.write("AQsensorerror ")
                         if (currTemp > -18):
                             try:
                                 results = pmsensor.read()
                                 for key in results:
                                     f.write(str(results[key]) + ", ")
                             except:
-                                f.write("PMsensorerror")
+                                f.write("PMsensorerror ")
                         f.write("\n")
                         f.close()
