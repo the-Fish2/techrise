@@ -36,3 +36,6 @@ Pollution is concentrated at lower altitudes, due to denser particles sinking. H
   * Epoxy works, tape residue melts
   * Popsicle sticks absorb humidity and skew readings
 
+### Code ###
+Clone the repository and save it to the metro. Certain files, ie TRSim Raven, require certain other physical parts (sent from NASA) to work.
+The code itself works with a Dashcam (hacked), a SPS 30 particulate matter sensor, and a BME 688 AQI. There is also an attached SD card.
