@@ -1,0 +1,50 @@
+import trsim_raven
+import board
+import busio
+import sdcardio
+import storage
+import time
+import adafruit_bme680
+
+# Initialize the BME680 sensor
+i2c = board.I2C()
+bme680 = adafruit_bme680.Adafruit_BME680_I2C(i2c)
+
+spi = board.SPI()
+spi = board.SPI()
+cs = board.D7
+sdcard = sdcardio.SDCard(spi, cs)
+vfs = storage.VfsFat(sdcard)
+storage.mount(vfs, "/sd")
+
+
+# Open a text file for writing
+with open("/sd/sensor_data.txt", "w") as file:
+    # Write the header of the table
+    # file.write("Hello, SD card!")
+    file.write("Time\t\tTemperature (C)\tHumidity (%)\tGas (Ohms)\tPressure (hPa)\n")
+    current_time = time.monotonic()
+    print(current_time)
+
+    while current_time < 700:
+        # Read sensor data
+        temperature = bme680.temperature
+        humidity = bme680.relative_humidity
+        gas = bme680.gas
+        pressure = bme680.pressure
+
+        # Get current time
+        current_time = time.monotonic()
+
+        # Print the data to the console
+        print("Time: {}\tTemperature: {}°C\tHumidity: {}%\tGas: {} Ohms\tPressure: {} hPa"
+              .format(current_time, temperature, humidity, gas, pressure))
+
+        # Write the data to the text file on the SD card in table format
+        file.write("{}\t{}\t\t{}\t\t{}\t\t{}\n".format(current_time, temperature, humidity, gas, pressure))
+
+        # Wait for a short duration before reading again (adjust as needed)
+        time.sleep(5)
+
+with open("/sd/sensor_data.txt", "r") as file:
+    print(file.read())
