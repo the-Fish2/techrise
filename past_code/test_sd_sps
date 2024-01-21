@@ -1,0 +1,50 @@
+import trsim_raven
+import board
+import busio
+import sdcardio
+import storage
+import time
+import adafruit_bme680
+from adafruit_sps30.i2c import SPS30_I2C
+
+
+i2c = board.I2C()
+pmsensor = SPS30_I2C(i2c, 0x69)
+
+spi = board.SPI()
+spi = board.SPI()
+cs = board.D7
+sdcard = sdcardio.SDCard(spi, cs)
+vfs = storage.VfsFat(sdcard)
+storage.mount(vfs, "/sd")
+
+current_time = time.monotonic()
+
+data = {
+    'particles 40um': 80.3049,
+    'particles 10um': 78.0542,
+    'pm10 standard': 10.0568,
+    'pm100 standard': 14.4134,
+    'pm25 standard': 12.3258,
+    'particles 25um': 80.0049,
+    'particles 100um': 80.3427,
+    'particles 05um': 65.6294,
+    'tps': 0.495773,
+    'pm40 standard': 13.7197
+}
+
+with open("/sd/sensor_data.txt", "w") as f:
+    f.write("Time\t\t{}\n".format("\t\t".join(data.keys())))
+
+print(current_time)
+
+while current_time <= 1250:
+    x = pmsensor.read()
+    current_time = time.monotonic()
+    
+    with open("/sd/sensor_data.txt", "a") as f:
+        f.write("{}\t\t{}\n".format(current_time, "\t\t".join("{:.4f}".format(value) for value in x.values())))
+    
+    print(x)
+
+    time.sleep(5)
