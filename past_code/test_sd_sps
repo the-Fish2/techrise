@@ -12,7 +12,6 @@ i2c = board.I2C()
 pmsensor = SPS30_I2C(i2c, 0x69)
 
 spi = board.SPI()
-spi = board.SPI()
 cs = board.D7
 sdcard = sdcardio.SDCard(spi, cs)
 vfs = storage.VfsFat(sdcard)
